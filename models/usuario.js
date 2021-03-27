@@ -43,7 +43,8 @@ const usuarioSchema = Schema({
 // Quitamos el password y la __v del a respuesta de la base de datos
 
 usuarioSchema.methods.toJSON = function() {
-    const {__v,password, ...usuario} = this.toObject();
+    const {__v,password,_id, ...usuario} = this.toObject();
+    usuario.id = _id; // Cambiamos el nombre del _id por uid
     return usuario;
 }
 
