@@ -2,6 +2,7 @@ const { response } = require("express");
 const bcryptjs = require('bcryptjs');
 const Usuario = require("../models/usuario");
 const { generarToken } = require("../helpers/generar-token");
+const { googleVerifu } = require("../helpers/db-google-verify");
 
 
 
@@ -29,8 +30,8 @@ const loginUsuario = async(req, res = response) => {
                 msg: "Correo / password son incorrectos - estado"
             })
         }
-        // Verificar la contraseña
 
+        // Verificar la contraseña
         const veriPass = bcryptjs.compareSync(password, usuario.password);
 
         if (!veriPass) {
@@ -60,6 +61,56 @@ const loginUsuario = async(req, res = response) => {
 
 }
 
+
+const googleSignin = async(req, res = response) => {
+
+    const { id_token } = req.body;
+
+    try {
+        
+        // Funcion para verificar que la cuanta de google sea correcta
+        const { correo, nombre, img } = await googleVerifu(id_token);
+
+        let usuario = await Usuario.findOne({correo});
+
+        if (!usuario) {
+            
+            const data = {
+                nombre,
+                correo,
+                img,
+                password: ':p',
+                google: true
+            }
+
+            usuario = new Usuario(data);
+            await usuario.save();
+        }
+
+        if (!usuario.estado) {
+            return res.status(401).json({
+                mjg: 'Usuario bloqueado, hable con el administrador'
+            })
+        }
+
+        // Generar tokend
+        const token = await generarToken(usuario.id);
+
+        res.json({
+            usuario,
+            token
+        })
+        
+    } catch (error) {
+        res.status(400).json({
+            msj: 'Token de google no reconocido'
+        })
+    }
+
+    
+}
+
 module.exports = {
-    loginUsuario
+    loginUsuario,
+    googleSignin
 }

@@ -25,6 +25,7 @@ const usuarioSchema = Schema({
     rol: {
         type: String,
         required: true,
+        default: 'USER_ROL',
         emun: ['ADMIN_ROLE','USER_ROL']
     },
 
