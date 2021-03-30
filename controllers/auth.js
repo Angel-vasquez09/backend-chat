@@ -102,8 +102,10 @@ const googleSignin = async(req, res = response) => {
         })
         
     } catch (error) {
+        console.log(error)
         res.status(400).json({
-            msj: 'Token de google no reconocido'
+            msj: 'Token de google no reconocido',
+            error
         })
     }
 
