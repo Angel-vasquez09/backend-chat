@@ -16,7 +16,8 @@
     <a href="#" onclick="signOut();">Sign out</a>
     
     <script>
-
+        console.log(window.location.hostname.includes('localhost'))
+        
         var url = (window.location.hostname.includes('localhost'))
                     ? 'http://localhost:8081/auth/google'
                     : 'https://rest-server-09.herokuapp.com/auth/google'
