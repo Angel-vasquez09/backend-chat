@@ -65,6 +65,7 @@ const loginUsuario = async(req, res = response) => {
 const googleSignin = async(req, res = response) => {
 
     const { id_token } = req.body;
+    console.log(id_token);
 
     try {
         
