@@ -65,12 +65,13 @@ const loginUsuario = async(req, res = response) => {
 const googleSignin = async(req, res = response) => {
 
     const { id_token } = req.body;
+
     console.log(id_token);
+    const { correo, nombre, img } = await googleVerifu(id_token);
 
     try {
         
         // Funcion para verificar que la cuanta de google sea correcta
-        const { correo, nombre, img } = await googleVerifu(id_token);
 
         let usuario = await Usuario.findOne({correo});
 
