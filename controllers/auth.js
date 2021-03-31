@@ -68,6 +68,9 @@ const googleSignin = async(req, res = response) => {
 
     console.log(id_token);
     const { correo, nombre, img } = await googleVerifu(id_token);
+    console.log('correo', correo)
+    console.log('nombre', nombre)
+    console.log('img', img)
 
     try {
         
