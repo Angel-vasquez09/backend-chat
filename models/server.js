@@ -41,9 +41,16 @@ class Server {
     // Rutas de mi aplicacion
     routes(){
         
-        this.app.use('/auth', require('../routes/auth'));
+        this.app.use('/auth',       require('../routes/auth'));
 
-        this.app.use('/usuario', require('../routes/user'));
+        this.app.use('/categorias', require('../routes/categorias'));
+        
+        this.app.use('/usuario',    require('../routes/user'));
+
+        this.app.use('/productos',  require('../routes/productos'));
+
+        this.app.use('/buscar',  require('../routes/buscar'));
+
     }
 
 
