@@ -1,8 +1,18 @@
 
 
-const Productos = require('./productos');
+const productos = require('./productos');
+const buscar = require('./buscar');
+const categoria = require('./categoria');
+const uploads = require('./uploads');
+const usuario = require('./user');
+const auth = require('./auth');
 
 
 module.exports = {
-    Productos
+    ...productos,
+    ...buscar,
+    ...categoria,
+    ...uploads,
+    ...usuario,
+    ...auth
 }

@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 const { dbConnection } = require('../database/config');
+const fileUpload = require('express-fileupload');
 
 // Creamos la clase
 class Server {
@@ -29,6 +30,13 @@ class Server {
         this.app.use(express.json());
 
         this.app.use(express.static('public'))
+
+        // Carga de archivo
+        this.app.use(fileUpload({
+            useTempFiles : true,
+            tempFileDir : '/tmp/',
+            createParentPath: true
+        }));
         
     }
 
@@ -50,6 +58,8 @@ class Server {
         this.app.use('/productos',  require('../routes/productos'));
 
         this.app.use('/buscar',  require('../routes/buscar'));
+
+        this.app.use('/uploads',  require('../routes/uploads'));
 
     }
 

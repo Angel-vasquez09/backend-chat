@@ -1,0 +1,10 @@
+NOTA: 
+Este archivo lo creo para que al momento de guardar los cambios en heroku, git
+o cualquier hosting le de seguimiento a esta carpeta y me la guardaremo
+
+si esta carpeta esta vacia a la hora de subirla a gir o a un hosting 
+no me la guardara porque no tiene ningun archivo dentro
+
+
+
+Aqui guardaremos todas las imagenes
