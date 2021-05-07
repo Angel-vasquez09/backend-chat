@@ -37,7 +37,7 @@ const validarToken = async(req,res = response,next) => {
         }
 
         // Si el token es valido guardamos los datos del usuario
-        req.usuario = usuario;
+        req.user = usuario;
 
         next();
 

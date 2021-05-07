@@ -2,12 +2,69 @@
 const { response } = require("express")
 const Usuario = require("../models/usuario");
 const bcryptjs = require("bcryptjs");
+const fs = require('fs');
+const path = require('path');
+
+const usuariosRegistrados = async(req, res = response) => {
+    
+    const [total, usuarios] = await Promise.all([
+        // Con este metodo resolvemos dos promesas de un solo tiroo
+        // y es mas rapido que esperar que se ejecute una y luego la otra
+        // Esta las ejecuta a las dos al tiempo
+        Usuario.countDocuments({estado:true}),
+        Usuario.find({estado: true})
+    ])
+    
+    res.json({
+        total,
+        usuarios
+    })
+}
+
+// OBTENER USUARIO POR ID
+const usuarioId = async(req, res = response) => {
+    
+    const usuario = await Usuario.findById(req.params.id);
+
+    try {
+        if (usuario) {
+            res.json({ 
+                usuario
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+
+// VALIDAR CORREO
+const validarCorreo = async(req, res = response) => {
+
+    const {correo} = req.params;
+
+    const usuario = await Usuario.find({correo: correo});
+
+    if (usuario.length === 0) {
+        return res.json({
+            ok: true,
+            mensaje: 'Correo valido no existe'
+        })
+    }else{
+        return res.json({
+            ok: false,
+            mensaje: 'Correo ya existe'
+        })
+    }
+
+}
 
 
 
 const usuarioGet = async(req, res = response) => {
 
-    const {limite = 5, desde = 0} = req.query;
+    const {limite = 10, desde = 0} = req.query;
     // Selecciona todos los datos, pero solo los que tengan el estado en true
     /* const usuarios = await Usuario.find({estado: true})
         .skip( Number(desde ))
@@ -58,14 +115,13 @@ const usuarioPut = async(req, res = response) => {
 
 const usuarioPost = async(req, res) => {
 
-    const {nombre, correo, password, rol} = req.body;
+
+    const {nombre,apellido, correo, password, rol, img} = req.body;
 
     // Creamos la intancia de nustra clase usuario
-    const usuario = new Usuario({nombre, correo, password, rol});
+    const usuario = new Usuario({nombre, apellido,correo, password, rol, img});
 
     // Verificar si el correo existe en la base de datos
-
-    
     /* */
 
     // Encriptar la contraseña
@@ -80,21 +136,27 @@ const usuarioPost = async(req, res) => {
     })
 }
 
+
+
 const usuarioDelete = async(req, res = response) => {
 
     const { id } = req.params;
     // No eliminamos el usuario solo le colocamos el estado en false
     const usuario = await Usuario.findByIdAndUpdate(id, {estado: false})
 
-    //const usuarioAutent = req.usuario;
+    const usuarioAutent = req.usuario;
 
     res.json(usuario);
 }
 
 
 module.exports = {
+    usuarioId,
     usuarioGet,
     usuarioPut,
     usuarioPost,
-    usuarioDelete
+    usuarioDelete,
+    usuariosRegistrados,
+    validarCorreo
+
 }

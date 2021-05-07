@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const {usuarioGet, usuarioPut, usuarioPost, usuarioDelete} = require("../controllers/user");
+const {usuarioGet, usuarioPut, usuarioPost, usuarioDelete, usuariosRegistrados, usuarioId, validarCorreo} = require("../controllers/user");
 const { esRolValido, emailExiste, existeUsuarioPorId } = require('../helpers/db-validators');
 const { validarCampos } = require('../middleware/validar-campos');
 const { esAdminRole } = require('../middleware/validar-role');
@@ -11,7 +11,22 @@ const router = Router();
 
 
 // OBTENER TODOS LOS USUARIOS PERO PAGINADOS
-router.get('/get', usuarioGet);
+router.get('/get',[
+    check('id', 'no es un ID valido').isMongoId(),
+    check('id').custom(existeUsuarioPorId),
+    validarCampos
+] ,usuarioGet);
+
+router.get('/:id', usuarioId);
+
+// OBTENER TODOS LOS USUARIOS REGISTRADOS
+router.get('/userRegistrados', usuariosRegistrados);
+
+// Validar Correo
+router.get('/correo/:correo', [
+    check('correo', 'correo invalido').isEmail(),
+    validarCampos
+], validarCorreo);
 
 
 
@@ -30,6 +45,7 @@ router.put('/put/:id',[
 // CREAR USUARIO
 router.post('/post', 
     check('nombre','El nombre es obligatorio').not().isEmpty(),
+    check('apellido','El apellido es obligatorio').not().isEmpty(),
     check('correo','El correo no es valido').isEmail(),
     check('correo').custom(emailExiste),
     check('password','El password debe tener mas de 6 caracteres').isLength({min: 6}),

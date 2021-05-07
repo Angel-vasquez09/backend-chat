@@ -6,6 +6,7 @@ const categoria = require('./categoria');
 const uploads = require('./uploads');
 const usuario = require('./user');
 const auth = require('./auth');
+const socketController = require('./socket.controllers');
 
 
 module.exports = {
@@ -14,5 +15,6 @@ module.exports = {
     ...categoria,
     ...uploads,
     ...usuario,
-    ...auth
+    ...auth,
+    ...socketController,
 }

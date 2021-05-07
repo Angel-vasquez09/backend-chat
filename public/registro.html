@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+
+    
+    <link rel="stylesheet" href="css/registro.css">
+    <link rel="stylesheet"  href="css/form.css" >
+</head>
+<body class="container">
+
+<!-- SPINNERS -->
+    <div id="snipperns" class="mostrar zindez spinner-border text-info position-absolute start-50" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <div id="divRegistro" class="card p-4 mt-5">
+        <!-- Visualizar la imagen antes -->
+        <div class="form-floating mb-3 text-center">
+            <div id="preview">
+
+            </div>
+            <input id="file" type="file" hidden />
+            <button onclick="activarbtn()" id="btn-file" class="btn"> Agregar Foto </button>
+            <hr>
+        </div>
+        <!-- Formulario -->
+        <form>
+            <div class="form-floating mb-3">
+                <input autocomplete="false" type="text" id="nombre" class="input form-control" name="Nombre" placeholder="Nombre" value="nombre01">
+                <label for="floatingInput">Nombre</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input autocomplete="false" type="text" id="apellido" class="input form-control" name="Apellido" placeholder="Apellido" value="nombre01">
+                <label for="floatingInput">Apellido</label>
+            </div>
+            
+            <div class="form-floating mb-3">
+                <input type="email" id="correo" class="input form-control" name="Correo" placeholder="Correo" value="correo1@hotmail.com">
+                <label for="floatingInput">Correo</label>
+            </div>
+            
+            <div class="form-floating mb-3">
+                <input type="password" id="password" class="input form-control" name="password" placeholder="password" value="1234567">
+                <label for="floatingInput">Password</label>
+            </div>
+
+            <div class="d-grid gap-2 text-center">
+                <button type="submit" class="btn btn-primary">
+                    Registrar
+                </button>
+                <a href="/">Cancelar</a>
+            </div>
+            
+        </form>
+    </div> 
+
+
+<!-- TOAST PARA AVISAR LA CONECCION Y DESCONECCION DE UN USUARIO -->
+<div id="toast" data-bs-animation="true" data-bs-delay="3000" autohide="true" role="alert" aria-live="assertive" aria-atomic="true" class="toast fade" data-bs-autohide="true">
+    <div id="cabeceraT" class="toast-header">
+        <i  class="color fas fa-user-check"></i>
+      <!-- <strong id="nombreToast" class="me-auto text-capitalize"></strong> -->
+    </div>
+    <div id="mensaje" class="toast-body text-capitalize">
+      <strong>Registro exitoso</strong>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
+<!-- Option 2: Separate Popper and Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+
+<script src="js/libs/jquery.min.js"></script>
+<script src="./js/login-registro.js"></script>
+
+</body>
+</html>

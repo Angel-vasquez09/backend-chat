@@ -14,14 +14,14 @@ router.put('/:coleccion/:id',[
     check('id', 'Id no es de mongo').isMongoId(),
     check('coleccion').custom(c => coleccionesPermitidas(c, ['usuarios','productos'])),
     validarCampos
-], actualizarImgCloudinary );
+], actualizarImgCloudinary);
 
 
 router.get('/:coleccion/:id',[
     check('id', 'Id no es de mongo').isMongoId(),
     check('coleccion').custom(c => coleccionesPermitidas(c, ['usuarios','productos'])),
     validarCampos
-], mostrarImg);
+],mostrarImg);
 
 
 module.exports = router;

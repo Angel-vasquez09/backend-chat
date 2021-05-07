@@ -17,6 +17,7 @@ const cargarArchivo = async(req, res = response) => {
         res.status(400).json({
             msg: 'No hay archivos que subir'
         });
+
         return;
     }
 
@@ -44,6 +45,7 @@ const cargarArchivo = async(req, res = response) => {
 const actualizarImg = async(req, res = response) => {
 
     const { coleccion, id} = req.params;
+
     let modelo;
 
     switch (coleccion) {
@@ -82,6 +84,7 @@ const actualizarImg = async(req, res = response) => {
             // Eliminamos ese directorio
             fs.unlinkSync(pathImagen)
         }
+
     }
 
     // Metodo para crear la carpeta y guardar la imagen
@@ -97,6 +100,7 @@ const actualizarImg = async(req, res = response) => {
     })
 
 }
+
 const actualizarImgCloudinary = async(req, res = response) => {
 
     const { coleccion, id} = req.params;
@@ -104,6 +108,7 @@ const actualizarImgCloudinary = async(req, res = response) => {
     let modelo;
 
     switch (coleccion) {
+
         case 'usuarios':
             modelo = await Usuario.findById(id);
             if ( !modelo) {
@@ -111,6 +116,7 @@ const actualizarImgCloudinary = async(req, res = response) => {
                     msg: `No existe un usuario con el id ${id}`
                 })
             }
+
             break;
     
         case 'productos':
@@ -123,19 +129,19 @@ const actualizarImgCloudinary = async(req, res = response) => {
             break;
     
         default:
+
             return res.status(500).json({
                 msg: 'Se me olvido esto'
             });
     }
 
     // Verificar que exista el archivo y que no guarde la misma imagen
-    if (modelo.img) {
+    if (modelo.img){
         const nombreArr = modelo.img.split('/');
         const nombre    = nombreArr[nombreArr.length - 1 ];
         const [ public_id ] = nombre.split('.');
         cloudinary.uploader.destroy(public_id);
     }
-    
 
     const { tempFilePath } = req.files.archivo;
 
@@ -147,8 +153,9 @@ const actualizarImgCloudinary = async(req, res = response) => {
 
 
     res.json({
+        ok: true,
         modelo
-    })
+    });
 
 }
 
@@ -196,7 +203,6 @@ const mostrarImg = async(req, res = response) => {
 
     // Verificar que exista el archivo y que no guarde la misma imagen
     if (modelo.img) {
-
         const pathImagen = path.join(__dirname, '../uploads', coleccion, modelo.img);
         // Si existe la imagen la muestro
         if (fs.existsSync(pathImagen)) {

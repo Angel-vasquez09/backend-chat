@@ -15,11 +15,26 @@ const coleccionesPermitidas = [
 // BUSQUEDA POR USUARIOS
 const buscarUsuario = async(termino = '', res = response) => {
 
+    // Creamos una expresion regular para que no le importen las mayusculas
+    const regex = new RegExp(termino, 'i');
+    /* console.log('Termino: => ',termino.length);
+    if (termino === '') {
+        console.log('Termino vacio')
+        const usuarios = await Usuario.find();
+
+        return res.json({
+            usuarios
+        })
+
+    } */
+
+
     // Verificamos que el id sea de mongodb
     const esIdMongo = ObjectId.isValid(termino); // TRUE O FALSE
 
     // Si pertenecce a mongo hacemos una busqueda del usuario al que le pertenece
     if (esIdMongo) {
+
         // Hacemo una busqueda por id
         const usuario = await Usuario.findById(termino);
         
@@ -29,8 +44,7 @@ const buscarUsuario = async(termino = '', res = response) => {
         });
     }
 
-    // Creamos una expresion regular para que no le importen las mayusculas
-    const regex = new RegExp(termino, 'i');
+    
 
     // hacemos una busqueda por nombre ó por correo
     // pero solo de los usuarios que tengan el estado a true
@@ -87,14 +101,19 @@ const busquedaProducto = async(termino = '', res = response) => {
 
     // Si pertenecce a mongo hacemos una busqueda del usuario al que le pertenece
     if (esIdMongo) {
-        // Hacemo una busqueda por id
-        const producto = await Producto.findById(termino)
+        try {
+            // Hacemo una busqueda por id
+            const producto = await Producto.findById(termino)
                                         .populate('categoria','nombre');
         
         // Agregamos el resultado
-        return res.json({
-            results: (producto) ? [producto] : []
-        });
+            return res.json({
+                results: (producto) ? [producto] : []
+            });
+        } catch (error) {
+            console.log(error)
+        }
+        
     }
 
     // Creamos una expresion regular para que no le importen las mayusculas

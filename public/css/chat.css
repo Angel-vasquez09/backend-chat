@@ -1,0 +1,68 @@
+.chat-list {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    height: 600px !important;
+}
+
+textarea {
+    width: 100%;
+}
+
+.chat-img img{
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 100% !important;
+    object-fit: cover;
+    text-decoration: none !important;
+}
+
+.infoUser{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    margin-left: -17px;
+    margin-right: 9px;
+}
+
+.conectado{
+    color: green;
+    font-size: 10px;
+}
+
+.desconectado{
+    color: red;
+    font-size: 10px;
+}
+
+.dflex{
+    display: flex !important;
+    align-items:center !important;
+}
+
+.bienvenido{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: auto 0;
+    margin-top: 10%;
+    
+}
+
+.welcome{
+    width: 80%;
+    height: 50%;
+    border: 1px solid #00e8ffb5 !important;
+    border-radius: 100%;
+    background: #00e8ffb5;
+    box-shadow: 26px -2px teal;
+}
+
+.texto{
+    margin-top: 100px;
+    color: white;
+}
+
+.scroll{
+    overflow-y: scroll;
+    height: 600px !important;
+}

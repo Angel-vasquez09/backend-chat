@@ -6,6 +6,10 @@ const usuarioSchema = Schema({
         type: String,
         required: [true, "Nombre obligatorio"]
     },
+    apellido: {
+        type: String,
+        required: [true, "Apellido obligatorio"]
+    },
 
     correo: {
         type: String,
@@ -24,7 +28,6 @@ const usuarioSchema = Schema({
 
     rol: {
         type: String,
-        required: true,
         default: 'USER_ROL',
         emun: ['ADMIN_ROLE','USER_ROL']
     },
@@ -35,6 +38,10 @@ const usuarioSchema = Schema({
     },
 
     google: {
+        type: Boolean,
+        default: false
+    },
+    online: {
         type: Boolean,
         default: false
     }

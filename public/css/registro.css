@@ -1,0 +1,44 @@
+body{
+    background: #f4f6f9 !important;
+}
+
+/* Registro exitoso */
+#toast{
+    margin-top: 10px;
+    background: #05d605b5;
+}
+.color{
+    color: #1fc8df;
+}
+
+#preview{
+    width : 198px !important;
+    height:198px !important;
+    border: rgb(31, 200, 223) 3px dashed;
+    border-radius:100% !important;
+    margin: auto !important;
+    background-image: url(../assets/images/default.jpg);
+    background-size: 100% 100% !important;
+
+}
+
+.btn{
+    border: 1px solid #1fc8df;
+    margin-top: 4px;
+    border-radius: 24px;
+    background: #1fc8df;
+    color: white;
+}
+
+.mostrar{
+    display: none;
+}
+
+.opacity{
+    opacity: .3;
+}
+
+.zindez{
+    z-index: 10;
+    top: 50%;
+}
