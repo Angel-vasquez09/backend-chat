@@ -2,6 +2,10 @@ let sock  = null; // Socket
 let user  = null; // Usuario autenticado
 let usuariosR; // Usuarios registrados en la base de datos
 
+var url = (window.location.hostname.includes('localhost'))
+            ? 'http://localhost:8081/'
+            : 'https://rest-server-09.herokuapp.com/';
+
 
 const divUsuarios = document.querySelector("#divUsuarios");
 const perfilImg   = document.querySelector("#perfilImg");
@@ -32,7 +36,7 @@ const validarTkn = async() => {
         throw new Error('No existe un token en el servidor');
     }
 
-    const resp = await fetch('http://localhost:8081/auth/', { 
+    const resp = await fetch(`${url}auth/`, { 
         headers: { 'x-token': token }
     });
 
@@ -260,7 +264,7 @@ input.oninput = async() => {
         return;
     }
 
-    const buscarAmigos = await fetch(`http://localhost:8081/buscar/usuarios/${texto}`);
+    const buscarAmigos = await fetch(`${url}buscar/usuarios/${texto}`);
 
     const amigos = await buscarAmigos.json();
 

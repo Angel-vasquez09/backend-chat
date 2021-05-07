@@ -72,7 +72,7 @@ miFormulario.addEventListener('submit', async(ev) => {
     }
 
     // Validar que no exista un correo en la base de datos
-    const invalidCorreo = await fetch(url + `usuario/correo/${correo.value}`);
+    const invalidCorreo = await fetch(`${url}usuario/correo/${correo.value}`);
     const respuesta = await invalidCorreo.json();
     
     if (!respuesta.ok) {
@@ -122,7 +122,7 @@ miFormulario.addEventListener('submit', async(ev) => {
     
     /* Guardamos los datos del usuario en la base de datos
     con o sin la foto */
-    const resp = await fetch(url + 'usuario/post',{
+    const resp = await fetch(`${url}usuario/post`,{
         method: 'POST',
         body: JSON.stringify(Data),
         headers: {'Content-Type': 'application/json'},
@@ -142,7 +142,7 @@ miFormulario.addEventListener('submit', async(ev) => {
             var formData = new FormData();
             formData.set('archivo',foto);
 
-            const resp = await fetch(url + `uploads/usuarios/${usuario.usuario.id}`,{
+            const resp = await fetch(`${url}uploads/usuarios/${usuario.usuario.id}`,{
                 method: 'PUT',
                 body: formData
             });

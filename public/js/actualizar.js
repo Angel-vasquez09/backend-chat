@@ -51,7 +51,7 @@ miForm.addEventListener('submit', async(ev) => {
         var formData = new FormData();
         formData.set('archivo',foto);
 
-        const resp = await fetch(url + `uploads/usuarios/${idActualizar.value}`,{
+        const resp = await fetch(`${url}uploads/usuarios/${idActualizar.value}`,{
             method: 'PUT',
             body: formData
         });
