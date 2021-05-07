@@ -8,7 +8,6 @@ var url = (window.location.hostname.includes('localhost'))
             ? 'http://localhost:8081/auth/'
             : 'https://rest-server-09.herokuapp.com/auth/';
 
-
 // Estilos css
 const divRegistro = document.querySelector('#divRegistro');
 const snipperns   = document.querySelector('#snipperns');
