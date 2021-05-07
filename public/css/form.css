@@ -73,3 +73,12 @@ body{
 .opacity{
     opacity: .7 !important;
 }
+
+.display{
+    display: flex;
+}
+
+
+#drop{
+    
+}

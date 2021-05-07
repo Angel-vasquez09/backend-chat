@@ -5,7 +5,7 @@ const password = document.querySelector('#password');
 
 
 var url = (window.location.hostname.includes('localhost'))
-            ? 'http://localhost:8081/auth/'
+            ? 'http://localhost:8080/auth/'
             : 'https://rest-server-09.herokuapp.com/auth/';
 
 // Estilos css

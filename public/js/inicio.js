@@ -3,7 +3,7 @@ let user  = null; // Usuario autenticado
 let usuariosR; // Usuarios registrados en la base de datos
 
 var url = (window.location.hostname.includes('localhost'))
-            ? 'http://localhost:8081/'
+            ? 'http://localhost:8080/'
             : 'https://rest-server-09.herokuapp.com/';
 
 

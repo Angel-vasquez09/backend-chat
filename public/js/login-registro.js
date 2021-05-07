@@ -13,7 +13,7 @@ const snipperns   = document.querySelector('#snipperns');
 var foto;
 
 var url = (window.location.hostname.includes('localhost'))
-            ? 'http://localhost:8081/'
+            ? 'http://localhost:8080/'
             : 'https://rest-server-09.herokuapp.com/';
 
 
