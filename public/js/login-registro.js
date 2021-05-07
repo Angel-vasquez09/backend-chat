@@ -87,7 +87,6 @@ miFormulario.addEventListener('submit', async(ev) => {
     
     if (password.value.length === 0 || password.value.length <= 6) {
         password.style.border = '1px solid red';
-        console.log('Password es obligatorio y con mas de 6 caracteres');
         listo = false;
     }else{
         password.style.border = '1px solid #1fc8df';
@@ -113,7 +112,6 @@ miFormulario.addEventListener('submit', async(ev) => {
 
 
     if (!listo) {
-        console.log('Todos los campos deben ser correctos');
         return;
     }
 
@@ -155,7 +153,8 @@ miFormulario.addEventListener('submit', async(ev) => {
                 nombre.value = '';
                 correo.value = '';
                 password.value = '';
-                window.location = 'chat.html';
+                window.location = 'index.html';
+                return;
             }
             
         }
@@ -165,7 +164,7 @@ miFormulario.addEventListener('submit', async(ev) => {
         nombre.value = '';
         correo.value = '';
         password.value = '';
-        window.location = 'chat.html';
+        window.location = 'index.html';
     }
     
 })
