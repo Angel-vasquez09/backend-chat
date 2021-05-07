@@ -74,7 +74,7 @@ miFormulario.addEventListener('submit', async(ev) => {
     // Validar que no exista un correo en la base de datos
     const invalidCorreo = await fetch(`${url}usuario/correo/${correo.value}`);
     const respuesta = await invalidCorreo.json();
-    
+    console.log(respuesta);
     if (!respuesta.ok) {
         mensaje(true);
         correo.style.border = '1px solid red';
