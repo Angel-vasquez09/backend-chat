@@ -1,5 +1,5 @@
 const { Socket } = require("socket.io");
-const { usuarioDesonectado, grabarMensaje, usuarioConectado, totalUser, actualizarUser } = require("../controllers/socket.controllers");
+const { usuarioDesonectado, grabarMensaje, usuarioConectado, actualizarUser, countMensajes, guardarCountMjs, chatActivo, totalUser } = require("../controllers/socket.controllers");
 const { comprobarToken } = require("../helpers");
 
 const { ChatMensajes } = require("../models");
@@ -32,6 +32,9 @@ const socketController = async(socket = new Socket, io) => {
     // Conectar al usuario a una sala especiali
     socket.join(usuario.id);
 
+    // OBTENER TODOS LOS MENSAJES NO LEIDOS DEL USUARIO AUTENTICADO
+    
+
 
     // Quitar usuario de la lista de los conectados cuando se desconecta
     socket.on('disconnect', () => {
@@ -43,39 +46,76 @@ const socketController = async(socket = new Socket, io) => {
 
     });
 
+    // Me toco emitir primero desde el servidor para poder escuchar el chat activo
+    // No podia emitir desde el cliente
+    socket.emit('chat','emitir chat activo');
+
+    socket.on('chat-activo', async({de,para,chat}) => {
+        await chatActivo(de,para,chat);
+    })
+    
+    socket.on('chat-inactivo', async({de,para,chat}) => {
+        await chatActivo(de,para,chat);
+    })
+
+
+
+
+
     socket.on('actualizar', (payload) => {
         const user = actualizarUser(payload);
         user.then(([usuario,usuarios]) => {
 
-            io.emit('user-registrados', usuarios);
+            io.emit('user-registrados', {usuarios,mjs});
+            
+
 
             socket.emit('user-actualizado', {usuario,usuarios});
 
         })
     })
 
-    socket.on('enviar-mensaje', async({para, mensaje}) => {
+    socket.on('enviar-mensaje', async({para, mensaje, hora}) => {
         
         // Grabamos el mensaje en la base de datos
-        const mjs = await grabarMensaje({de: usuario.id, para: para, mensaje: mensaje })
+        await grabarMensaje({de: usuario.id, para: para, mensaje: mensaje })
         
-        const datos = { nombre: usuario.nombre, mensaje: mensaje }
+        const datos = { nombre: usuario.nombre, mensaje: mensaje, hora: hora }
         
-        //chatMensaje.enviarMensaje(usuario.id, usuario.nombre, mensaje);
-        
+        /* chatMensaje.enviarMensaje(usuario.id, usuario.nombre, mensaje); */
         // Le enviamos el mensaje al usuario con el que estamos chateando
-        socket.to(para).emit('mensaje-privado', { datos: mjs, yo: false})
-        // recibo los ultimos 10 mensajes que han enviado
+        socket.to(para).emit('mensaje-privado', { datos: datos, yo: false})
+        
+        await guardarCountMjs({de: usuario.id,para: para, num: 1 });
+        
+        // Le eniamos una notificacion al usuario de que tiene un mensaje sin leer
+        const countM = await countMensajes(para);
+        
+        const total = await totalUser();
+
+        socket.to(para).emit('count-mjs-priv', {total,countM});
+        
+        
         
     })
 
     // Usuario Conectado
     const userConectado = usuarioConectado(usuario.id);
+    const countM = countMensajes(usuario.id);
     userConectado.then(([usuarios, usuario]) => {
         socket.broadcast.emit('conectado', usuarios);
         io.emit('user-registrados', usuario);
-    })
+        countM.then(resp => {
+            socket.emit('count-mjs', resp);
+        });
 
+        
+
+    });
+
+
+    
+    
     
 }
 

@@ -66,3 +66,15 @@ textarea {
     overflow-y: scroll;
     height: 600px !important;
 }
+
+.nuevo-mjs{
+    border: 1px solid black;
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    left: 24px;
+    border-radius: 100%;
+    text-align: center;
+    background: #1fc8df;
+    color: white;
+}

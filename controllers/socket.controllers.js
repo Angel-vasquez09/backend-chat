@@ -1,5 +1,6 @@
 const Usuario = require('../models/usuario');
 const Chat = require('../models/chat');
+const CountMjs = require('../models/count-mjs');
 
 const usuarioConectado = async(id = '') => {
     const usuario = await Usuario.findById(id);
@@ -10,9 +11,41 @@ const usuarioConectado = async(id = '') => {
     return [usuario,usuarios];
 }
 
+// Metodo para obtener la cantidad de mensajes que no a leido cada usuario
+const countMensajes = async(mi) => {
+
+    const count = await CountMjs.find({para: mi});
+
+    return count;
+}
+
+// Metodo para crear un mensaje no leido de un usuario,
+// o para aumentar la cantidad de mensajes que no han leido
+const guardarCountMjs = async({de,para,num}) => {
+
+    const usuario = await Usuario.findById(para);
+    // Verificamos si esta dentro de nuestro chatt
+    if (!usuario.chat || usuario.usuario !== de) {
+        /* Si no esta dentro de nuestro chatt procederemos a
+        guardar los mensajes que no a leido */
+        const count = await CountMjs.find({
+            $and: [{de: de},{para: para}]
+        });
+
+        if (count.length === 0) {
+            const guardar = await CountMjs({de,para});
+            await guardar.save();
+        }else{
+            count[0].cantidad++;
+            count[0].save();
+        }
+    }
+
+    return true;
+}
 
 // USUARIOS REGISTRADOS
-const totalUser = async(id = '') => {
+const totalUser = async() => {
     const usuarios = await Usuario.find();
     return usuarios;
 }
@@ -29,6 +62,36 @@ const actualizarUser = async(data) => {
     const usuarios = await Usuario.find();
     return [usuario,usuarios];
 }
+
+
+
+// ACTUALIZAR USUARIO PARA SABER EN QUE CHAT SE ENCUENTRA
+const chatActivo = async(de,para,chat) => {
+
+    const usuario  = await Usuario.findById(de);
+    usuario.usuario = para;
+    if (chat) {
+        usuario.chat = true;
+        const count = await CountMjs.find({
+            $and: [{de: para},{para: de}]
+        });
+        if (count.length > 0) {
+            // Cuando entre al chat colocamos en 0 los mensajes que no habiamos leido
+            count[0].cantidad = 0;
+            count[0].save();
+        }
+    }else{
+        usuario.chat = false;
+    }
+    await usuario.save();
+
+    return true;
+
+}
+
+
+
+
 
 
 
@@ -78,5 +141,8 @@ module.exports = {
     grabarMensaje,
     usuariosConectados,
     totalUser,
-    actualizarUser
+    actualizarUser,
+    countMensajes,
+    guardarCountMjs,
+    chatActivo
 }

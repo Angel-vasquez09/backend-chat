@@ -44,7 +44,16 @@ const usuarioSchema = Schema({
     online: {
         type: Boolean,
         default: false
-    }
+    },
+    chat: {
+        type: Boolean,
+        default: false
+    },
+    usuario: {
+        type: Schema.Types.ObjectId,
+    },
+
+
 
 })
 

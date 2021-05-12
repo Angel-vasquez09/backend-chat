@@ -118,15 +118,23 @@ const conectarSocket = async() =>{
         })
     });
 
+    // Mostrar los mensajes no leidos al enviar un mensaje privado
+    socket.on('count-mjs-priv', ({total,countM}) => {
+        console.log('Holaaa: ',countM);
+        ListaUser(total,countM);
+    })
 
-    socket.on('user-registrados', (data) =>{
+
+    socket.on('user-registrados', (usuarios) =>{
+        usuariosRegistrados = usuarios;
+        socket.on('count-mjs', (payload) => {
+            ListaUser(usuarios,payload);
+        })
         /* Guardamos todos los usuarios registrados
         para despues utilizarlo en la busqueda de usuarios */
-        usuariosRegistrados = data;
         // Listamos todos los usuarios registrados
-        ListaUser(data);
-        infoUser.innerHTML = `<a class="active" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
-        
+        infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
+        //console.log(mjs);
     });
 
     socket.on('conectado', (payload) => {
@@ -135,9 +143,9 @@ const conectarSocket = async() =>{
 
     
     socket.on('user-actualizado', ({usuario,usuarios}) => {
-        nombreP.innerHTML =`<h1 class="text-capitalize">${usuario.nombre} ${usuario.apellido}</h1>`;;
+        nombreP.innerHTML =`<h1 class="text-capitalize animated fadeIn">${usuario.nombre} ${usuario.apellido}</h1>`;;
         user = usuario;
-        infoUser.innerHTML = `<a class="active" id="user-img"><img src="${usuario.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${usuario.nombre}</small></span></a>`;
+        infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${usuario.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${usuario.nombre}</small></span></a>`;
         mensaje(usuario,true);
         ListaUser(usuarios);
     })
@@ -146,7 +154,10 @@ const conectarSocket = async() =>{
         mensaje(payload,false);
     });
 
-
+    // socket para saber que el usuario no esta dentro de ningun chat
+    socket.on('chat', () => {
+        socket.emit('chat-inactivo', {de: user.id, para: user.id,chat: false})
+    })
     
 
 }
@@ -186,7 +197,7 @@ const mensaje = (payload,user_actu) => {
         
         $('.toast').toast('show');
         var estilos = 'width: 45px; height: 45px; object-fit: cover; border-radius: 100% !important;'
-        $("#cabeceraT").html(`<img src='${payload.img}' style='${estilos}'  class="rounded me-2">`);
+        $("#cabeceraT").html(`<img class="animated fadeIn" src='${payload.img}' style='${estilos}'  class="rounded me-2">`);
         $('#nombreToast').text(`${payload.nombre}`);
         $('#mensaje').text(msj);
     });
@@ -205,11 +216,9 @@ const mensaje = (payload,user_actu) => {
 ======= LISTTAR USUARIOS CONECTADOS====
 ===================================================================
  */
-const ListaUser = (usuarios) => {
-    infoUser.innerHTML = `<a class="active" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
-
+const ListaUser = (usuarios,payload) => {
+    infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
     var html = '';
-    
     for (let index = 0; index < usuarios.length; index++) {
         const element = usuarios[index];
         let conectado = 'desconectado'
@@ -218,9 +227,17 @@ const ListaUser = (usuarios) => {
         }
         
         if (element.id !== user.id) {
-            html += '<li id="chatPrivado" class="row">';
+            html += '<li id="chatPrivado" class="row animated fadeIn">';
 
             html += '   <div class="col-8 p-0">';
+            for (let index = 0; index < payload.length; index++) {
+                const countM = payload[index];
+                if (countM.de === element.id) {
+                    if (countM.cantidad !== 0) {
+                        html += '   <div class="nuevo-mjs"><span>'+countM.cantidad+'</span></div>';
+                    }
+                }
+            }
             html +=         '<a class="text-decoration-none pr-0" href="chat-privado.html?id='+element.id+'"><img src="'+element.img+'" alt="user-img" class="img-circle"> <span class="text-capitalize">'+ element.nombre +'</span></a>';
             html += '   </div>';
 

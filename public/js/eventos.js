@@ -9,10 +9,8 @@ mostrarUsuarios.onclick = function(){
 
     if (!abierto) {
         mostrarPanel.style.left = '0';
-        //console.log('Cerrado');
         abierto = true;
     }else{
-        //console.log('Abierto');
         mostrarPanel.style.left = '-250px';
         abierto = false;
     }
@@ -21,8 +19,6 @@ mostrarUsuarios.onclick = function(){
 function myFunction(x) {
     if (x.matches && !abierto) { // If media query matches
         mostrarPanel.style.left = '-250px';
-        console.log('Cerrado');
-        console.log(x.matches)
     } else {
         mostrarPanel.style.left = '0';
     }

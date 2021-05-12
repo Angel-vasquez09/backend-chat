@@ -81,7 +81,8 @@ const validarTkn = async() => {
         const mensajes = await resp.json()
 
         cargarChat(mensajes.mensajes);
-        
+        // Colocar el scrool al final del chat cuando se carguen los mensjaes
+        scrollMensajes(true);
     }
 }
 
@@ -142,11 +143,11 @@ const cargarChat = (mensajes) => {
     if (mensajes.length === 0) {
         
         var welcome = `
-            <div class="container welcome">
+            <div class="container welcome animated fadeIn">
                 <h1 class="display-3 texto text-center">WELCOME</h1>
             </div>
-            <h2 class="text-center mt-4">Mandale un saludo a ${datosUsuario.nombre}</h2>
-            <h2 class="text-center mt-4"> ........................</h2>
+            <h2 class="text-center mt-4 animated fadeIn">Mandale un saludo a ${datosUsuario.nombre}</h2>
+            <h2 class="text-center mt-4 animated fadeIn"> ........................</h2>
             `;
         bienvenido.innerHTML = welcome;
 
@@ -158,7 +159,7 @@ const cargarChat = (mensajes) => {
         if (element.de === usuario.id) {
             var date = new Date(element.createdAt);
             var hora = date.getHours() + ':' + date.getMinutes(); 
-            html += '<li class="reverse">';
+            html += '<li class="reverse animated fadeIn">';
             html +=     '<div class="chat-content">';
             html +=         '<div class="box bg-light-inverse">'+ element.mensaje +'</div>';
             html +=     '</div>';
@@ -206,25 +207,30 @@ const conectarSocket = async() =>{
         }
     });
 
+    socket.on('count-mjs-priv', ({total,countM}) => {
+        console.log('Holaaa: ',countM);
+        ListaUser(total,countM);
+    })
+
+
     socket.on('connect', () => {
         socket.on('user-registrados', (data) =>{
             /* Guardamos todos los usuarios registrados
             para despues utilizarlo en la busqueda de usuarios */
             usuariosRegistrados = data;
-            // Listamos todos los usuarios registrados
-            ListaUser(data)
+            socket.on('count-mjs', (payload) => {
+                ListaUser(data,payload);
+            });
         });
         
     });
 
     socket.on('conectado', (payload) => {
         mensaje(payload);
-        console.log('Usuario conectado')
     });
     
     socket.on('desconectado', (payload) => {
         mensaje(payload);
-        console.log('usuario desconectado')
     });
 
     socket.on('disconnect', () => {
@@ -232,8 +238,15 @@ const conectarSocket = async() =>{
     })
 
     socket.on('mensaje-privado', ({datos, yo}) => {
-        ListarMensajes(datos,yo);       
+        ListarMensajes(datos,yo);
+        
     });
+
+    /* Actualizar el usuario para saber en que chat se encuentra */
+    socket.on('chat', (resp) => {
+        socket.emit('chat-activo', {de: usuario.id,para: para,chat: true});
+    });
+
 
 }
 /* 
@@ -293,7 +306,7 @@ const mensaje = (payload) => {
  */
 
 
-const ListaUser = (usuarios) => {
+const ListaUser = (usuarios,payload) => {
 
     var html = '';
     
@@ -308,7 +321,7 @@ const ListaUser = (usuarios) => {
     nombreUser.innerHTML = nom; 
 
         if (para != '') {
-            html += '<li>';
+            html += '<li class="animated fadeIn">';
             html +=    '<a class="text-decoration-none" href="chat.html" class="active">Regresar Chat General</span></a>';
             html += '</li>';    
         }
@@ -322,9 +335,19 @@ const ListaUser = (usuarios) => {
         }
         
         if (element.id !== usuario.id) {
-            html += '<li id="chatPrivado" class="row">';
+            html += '<li id="chatPrivado" class="row animated fadeIn">';
 
             html += '   <div class="col-8 p-0">';
+            for (let index = 0; index < payload.length; index++) {
+                const countM = payload[index];
+                if (countM.de !== para) {   
+                    if (countM.de === element.id) {
+                        if (countM.cantidad !== 0) {
+                            html += '<div class="nuevo-mjs"><span>'+countM.cantidad+'</span></div>';
+                        }
+                    }
+                }
+            }
             html +=         '<a class="text-decoration-none pr-0" href="chat-privado.html?id='+element.id+'"><img src="'+element.img+'" alt="user-img" class="img-circle"> <span class="text-capitalize">'+ element.nombre +'</span></a>';
             html += '   </div>';
 
@@ -348,24 +371,48 @@ const ListaUser = (usuarios) => {
 
 
 
-/* function scrollBottom() {
+/* const  scrollBottom  = () => {
+    $(document).ready(function(){
+        // selectors
+        var newMessage = divChatbox.children[divChatbox.children.length - 1];
+        
+        // heights
+        var clientHeight      = divChatbox.prop('clientHeight');
+        var scrollTop         = divChatbox.prop('scrollTop');
+        var scrollHeight      = divChatbox.prop('scrollHeight');
+        var newMessageHeight  = newMessage.innerHeight();
+        var lastMessageHeight = newMessage.prev().innerHeight() || 0;
 
-    // selectors
-    var newMessage = divChatbox.children('li:last-child');
+        if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+            divChatbox.scrollTop(scrollHeight);
+        }
+    })
+} */
 
-    // heights
-    var clientHeight      = divChatbox.prop('clientHeight');
-    var scrollTop         = divChatbox.prop('scrollTop');
-    var scrollHeight      = divChatbox.prop('scrollHeight');
-    var newMessageHeight  = newMessage.innerHeight();
-    var lastMessageHeight = newMessage.prev().innerHeight() || 0;
 
-    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
-        divChatbox.scrollTop(scrollHeight);
+
+const scrollMensajes = (ultimoMensaje) => {
+    var clientHeight     = divChatbox.clientHeight;
+    var scrolTop         = divChatbox.scrollTop;
+    var scrolhei         = divChatbox.scrollHeight;
+    var newMessageHeight = divChatbox.children[divChatbox.children.length - 1].offsetHeight || 0;
+    var lastMessageHeight= divChatbox.children[divChatbox.children.length - 2].offsetHeight || 0;
+
+    if (ultimoMensaje) {
+        divChatbox.scrollTop = divChatbox.scrollHeight;
+        return;
+    }
+
+    if ((clientHeight + scrolTop + newMessageHeight + lastMessageHeight) >= scrolhei) {
+        // El scroll no se ira hacia bajo si el scroll esta en los mensajes de arribaa
+        // Sola baja el scroll cuando me encuentro en el ultimo mensaje
+        divChatbox.scrollTop = divChatbox.scrollHeight;
     }
 }
+    
 
- */
+
+
 
 
 /* 
@@ -375,13 +422,13 @@ const ListaUser = (usuarios) => {
  */
 
 const ListarMensajes = (datos,yo) => {
-
+    
     var html = '';
     if (yo) {
         // Si el mensaje lo envio yo, se mostrara este
-        html += '<li class="reverse">';
+        html += '<li class="reverse animated fadeIn">';
         html +=     '<div class="chat-content">';
-        html +=         '<h5>'+ datos.nombre +'</h5>';
+        //html +=         '<h5>'+ datos.nombre +'</h5>';
         html +=         '<div class="box bg-light-inverse">'+ datos.mensaje +'</div>';
         html +=     '</div>';
 /*         html +=     '<div class="chat-img"><img src="assets/images/users/5.jpg" alt="user" /></div>';
@@ -391,12 +438,12 @@ const ListarMensajes = (datos,yo) => {
     }else{
         // Este mensaje lo resive la otra persona
         html += '<li class="animated fadeIn">';
+        html +=      '<div class="chat-time">'+datos.hora+'</div>';
 /*         html +=     '<div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>';
  */     html +=         '<div class="chat-content">';
-        html +=             '<h5>'+ datos.nombre +'</h5>';
+        //html +=             '<h5>'+ datos.nombre +'</h5>';
         html +=             '<div class="box bg-light-info">'+ datos.mensaje +'</div>';
         html +=         '</div>';
-        html +=      '<div class="chat-time">'+datos.hora+'</div>';
         html += '</li>';
     }
 
@@ -428,15 +475,18 @@ formEnviar.addEventListener('submit', (e) => {
     if (txtMensaje.value.trim().length === 0) {
         return;
     }
+
+    var fecha = new Date();
+    var hora = fecha.getHours() + ':' + fecha.getMinutes();
     
     socket.emit('enviar-mensaje', {
         para   : para,
-        mensaje: txtMensaje.value
+        mensaje: txtMensaje.value,
+        hora   : hora
     });
 
     
-    var fecha = new Date();
-    var hora = fecha.getHours() + ':' + fecha.getMinutes();
+    
     
     ListarMensajes(
         {
@@ -444,8 +494,11 @@ formEnviar.addEventListener('submit', (e) => {
             mensaje : txtMensaje.value,
             hora    : hora
         }, true);
+
     txtMensaje.value = '';
     bienvenido.innerHTML = '';
+   
+    scrollMensajes(false);
 })
 
 /* 
