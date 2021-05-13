@@ -1,22 +1,39 @@
 const Usuario = require('../models/usuario');
 const Chat = require('../models/chat');
 const CountMjs = require('../models/count-mjs');
+const { response } = require('express');
 
 const usuarioConectado = async(id = '') => {
-    const usuario = await Usuario.findById(id);
-    usuario.online = true;
-    await usuario.save();
-    const usuarios = await Usuario.find();
+    const user = await Usuario.findById(id);
+    user.online = true;
+    await user.save();
+    const users = await Usuario.find();
     
-    return [usuario,usuarios];
+    return [user,users];
 }
 
 // Metodo para obtener la cantidad de mensajes que no a leido cada usuario
 const countMensajes = async(mi) => {
-
     const count = await CountMjs.find({para: mi});
-
     return count;
+}
+
+const peticionCountMjs = async(req,res = response) => {
+    const { id } = req.params;
+    
+    try {
+    
+        const count = await CountMjs.find({para: id});
+        
+        res.json({
+            ok: true,
+            count
+        })
+        
+    } catch (error) {
+        console.log(error)
+    }
+    
 }
 
 // Metodo para crear un mensaje no leido de un usuario,
@@ -55,12 +72,12 @@ const totalUser = async() => {
 
 const actualizarUser = async(data) => {
     var id = data.id;
-    const usuario  = await Usuario.findById(id);
-    usuario.nombre   = data.nombre;
-    usuario.apellido = data.apellido;
-    await usuario.save();
+    const user  = await Usuario.findById(id);
+    user.nombre   = data.nombre;
+    user.apellido = data.apellido;
+    await user.save();
     const usuarios = await Usuario.find();
-    return [usuario,usuarios];
+    return [user,usuarios];
 }
 
 
@@ -97,11 +114,11 @@ const chatActivo = async(de,para,chat) => {
 
 
 const usuarioDesonectado = async(id = '') => {
-    const usuario = await Usuario.findById(id);
-    usuario.online = false;
-    await usuario.save();
-    const usuarios = await Usuario.find();
-    return [usuarios,usuario];
+    const user = await Usuario.findById(id);
+    user.online = false;
+    await user.save();
+    const users = await Usuario.find();
+    return [user,users];
 }
 
 
@@ -144,5 +161,6 @@ module.exports = {
     actualizarUser,
     countMensajes,
     guardarCountMjs,
-    chatActivo
+    chatActivo,
+    peticionCountMjs
 }

@@ -74,6 +74,12 @@ class Server {
 
         this.app.use('/mensajes',  require('../routes/mensajes'));
 
+        this.app.use('/webpush',  require('../routes/webpush'));
+
+        this.app.use('/pushSubscription',  require('../routes/pushSubscription'));
+        
+        this.app.use('/countMensajes',  require('../routes/countMensaje'));
+
     }
 
 

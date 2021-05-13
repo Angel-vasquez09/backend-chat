@@ -5,6 +5,9 @@ var url = (window.location.hostname.includes('localhost'))
 var params = new URLSearchParams(window.location.search);
 var para = '';
 
+// LLAVE PARA SUBSCRIBIR AL USUARIO
+
+
 if (params.get('id')) {
     para = params.get('id');
 }
@@ -34,6 +37,8 @@ var infoUser      = document.querySelector("#infoUser");
 ===================================================================
  */
 const validarTkn = async() => {
+
+    
 
     // Extraemos el token que tengamos en el navegador
     const token = localStorage.getItem('token') || '';
@@ -84,13 +89,68 @@ const validarTkn = async() => {
         // Colocar el scrool al final del chat cuando se carguen los mensjaes
         scrollMensajes(true);
     }
+
+
+    
+    
 }
 
 /* 
 ===================================================================
 ======= FIN DE VALIDAR TOKEN ====
 ===================================================================
+*/
+
+
+/* 
+===================================================================
+======= ENVIAR NOTIFICACION DE MENSAJES A EL USUARIO PRIVADO ====
+===================================================================
  */
+
+const enviarNotificacion = async() => {
+
+    /* Solo enviaremos la notificacion si el usuario no se 
+    encuentra en el navegador */
+    if (!datosUsuario.online) {
+        /*Buscamos en la base de datos al usuario que queremos enviarle
+        una notificacion */
+        const obtenerUsuario = await fetch(`${url}pushSubscription/${para}`);
+
+        const userObtenido = await obtenerUsuario.json();
+
+        if (userObtenido.ok) {
+            /* Estraemos la suscripcion del navegador de el usuario
+            al que le enviaremos la notify */
+            const data = {
+                title: `${datosUsuario.nombre}`,
+                message: `Tienes un nuevo mensaje de ${usuario.nombre}`,
+                pushSubscription: userObtenido.verificarId.subcription
+            }
+
+            /* Gracias a la suscripcion que le estragimos al usuario
+            podemos enviarle una notificacion al navegador en que 
+            se encuentre subscrito */
+            const newMessage = await fetch(`${url}webpush/new-message`,{
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            }); 
+        }
+    }
+}
+
+
+
+
+
+
+/* 
+===================================================================
+======= ENVIAR NOTIFICACION DE MENSAJES A EL USUARIO PRIVADO ====
+===================================================================
+ */
+
 
 
 
@@ -214,13 +274,20 @@ const conectarSocket = async() =>{
 
 
     socket.on('connect', () => {
-        socket.on('user-registrados', (data) =>{
-            /* Guardamos todos los usuarios registrados
-            para despues utilizarlo en la busqueda de usuarios */
+        socket.on('user-registrados', async(data) =>{
+            
             usuariosRegistrados = data;
+
             socket.on('count-mjs', (payload) => {
+                console.log('Dentro');
                 ListaUser(data,payload);
+                return;
             });
+    
+    
+            const countMjsUser = await fetch(`${url}countMensajes/${usuario.id}`);
+            const {ok, count} = await countMjsUser.json();
+            ListaUser(data,count);
         });
         
     });
@@ -395,8 +462,13 @@ const scrollMensajes = (ultimoMensaje) => {
     var clientHeight     = divChatbox.clientHeight;
     var scrolTop         = divChatbox.scrollTop;
     var scrolhei         = divChatbox.scrollHeight;
-    var newMessageHeight = divChatbox.children[divChatbox.children.length - 1].offsetHeight || 0;
-    var lastMessageHeight= divChatbox.children[divChatbox.children.length - 2].offsetHeight || 0;
+    var newMessageHeight = divChatbox.children[divChatbox.children.length - 1];
+    var lastMessageHeight= divChatbox.children[divChatbox.children.length - 2];
+
+    if (newMessageHeight !== undefined && lastMessageHeight !== undefined) {
+        newMessageHeight.offsetHeight;
+        lastMessageHeight.offsetHeight;
+    }
 
     if (ultimoMensaje) {
         divChatbox.scrollTop = divChatbox.scrollHeight;
@@ -497,8 +569,9 @@ formEnviar.addEventListener('submit', (e) => {
 
     txtMensaje.value = '';
     bienvenido.innerHTML = '';
-   
     scrollMensajes(false);
+
+    enviarNotificacion();
 })
 
 /* 

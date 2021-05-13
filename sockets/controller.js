@@ -33,16 +33,16 @@ const socketController = async(socket = new Socket, io) => {
     socket.join(usuario.id);
 
     // OBTENER TODOS LOS MENSAJES NO LEIDOS DEL USUARIO AUTENTICADO
-    
 
 
     // Quitar usuario de la lista de los conectados cuando se desconecta
-    socket.on('disconnect', () => {
-        const userDesconectado = usuarioDesonectado(usuario.id);
-        userDesconectado.then(([usuarios,usuario]) => {
-            socket.broadcast.emit('desconectado', usuario);
-            io.emit('user-registrados', usuarios);
-        })
+    socket.on('disconnect', async() => {
+        
+        const [user,users] = await usuarioDesonectado(usuario.id);
+        const countM       = await countMensajes(usuario.id);
+        socket.broadcast.emit('desconectado', user);
+        io.emit('user-registrados', users);
+        socket.emit('count-mjs', countM);
 
     });
 
@@ -62,17 +62,14 @@ const socketController = async(socket = new Socket, io) => {
 
 
 
-    socket.on('actualizar', (payload) => {
-        const user = actualizarUser(payload);
-        user.then(([usuario,usuarios]) => {
+    socket.on('actualizar', async(payload) => {
+        const [user,usuarios] = await actualizarUser(payload);
+        const countM = await countMensajes(usuario.id);
 
-            io.emit('user-registrados', {usuarios,mjs});
-            
-
-
-            socket.emit('user-actualizado', {usuario,usuarios});
-
-        })
+        socket.emit('count-mjs', countM);
+        io.emit('user-registrados', usuarios);
+        socket.emit('user-actualizado', {user,usuarios});
+        
     })
 
     socket.on('enviar-mensaje', async({para, mensaje, hora}) => {
@@ -99,20 +96,18 @@ const socketController = async(socket = new Socket, io) => {
         
     })
 
-    // Usuario Conectado
-    const userConectado = usuarioConectado(usuario.id);
-    const countM = countMensajes(usuario.id);
-    userConectado.then(([usuarios, usuario]) => {
-        socket.broadcast.emit('conectado', usuarios);
-        io.emit('user-registrados', usuario);
-        countM.then(resp => {
-            socket.emit('count-mjs', resp);
-        });
+    const usuarioConectadoServer = async() => {
 
-        
+        const [user, users] = await usuarioConectado(usuario.id);
+        const countM              = await countMensajes(usuario.id);
 
-    });
+        socket.emit('count-mjs', countM);
+        io.emit('user-registrados', users);
+        socket.broadcast.emit('conectado', user);
+    }
 
+    // Se ejecutara cuando un usuario se conecte
+    usuarioConectadoServer();
 
     
     

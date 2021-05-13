@@ -68,6 +68,61 @@ const validarTkn = async() => {
 
     await conectarSocket();
 
+
+
+
+
+
+    const PUBLIC_PUSH_KEY = "BJSbnxvcKTYWwErF8vvk6UFj3cXcFECsOJE78_XboD3GcC1GPglenWtdPWaW9HEwbN0RnA4tQ-pZtGGJVTtIN8k";
+    // SUSCRIBIMOS AL USUARIO PARA PODER ENVIARLE NOTIFICACIONES
+
+    /* Funcion para convertir la cadena base64 segura de URL en un 
+     Uint8Array para pasar a la llamada de suscripción */
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+          .replace(/-/g, '+')
+          .replace(/_/g, '/');
+       
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+       
+        for (let i = 0; i < rawData.length; ++i) {
+          outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+      }
+
+    /*Convertimos en  Uint8Array y guardamos en una variable */
+    var push_key = urlBase64ToUint8Array(PUBLIC_PUSH_KEY);
+
+    /*  */
+    const register = await navigator.serviceWorker.register(`js/worker.js`,{
+        scope: `../js/`
+    })
+
+    // Obtenemos la suscripcion del navegador en que nos encontremos
+    const subsc = await register.pushManager.subscribe({
+        userVisibleOnly     : true,
+        applicationServerKey: push_key
+    });
+
+    /* Creamos un objeto en donde guardaremos la suscripcion del
+    navegador en que estemos y tambien guardaremos el id
+    del usuario autenticado en este navegador */
+    let userSubscripcion = {id: user.id}
+
+    let datosSubs = JSON.stringify(subsc);
+
+    userSubscripcion['subcription'] = JSON.parse(datosSubs);
+    
+    // Guardar esa subscripcion en la base de datos
+    const guardarSubscripcion = await fetch(`${url}pushSubscription/guardar-subscripcion`,{
+        method: 'POST',
+        body: JSON.stringify(userSubscripcion),
+        headers: {'Content-Type': 'application/json'},
+    });
+
     
 }
 
@@ -125,32 +180,49 @@ const conectarSocket = async() =>{
     })
 
 
-    socket.on('user-registrados', (usuarios) =>{
+    socket.on('user-registrados', async(usuarios) => {
+
         usuariosRegistrados = usuarios;
-        socket.on('count-mjs', (payload) => {
-            ListaUser(usuarios,payload);
-        })
-        /* Guardamos todos los usuarios registrados
-        para despues utilizarlo en la busqueda de usuarios */
-        // Listamos todos los usuarios registrados
         infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
-        //console.log(mjs);
+        
+        socket.on('count-mjs', (payload) => {
+            console.log('Dentro');
+            ListaUser(usuarios,payload);
+            return;
+        });
+
+
+        const countMjsUser = await fetch(`${url}countMensajes/${user.id}`);
+        const {ok, count} = await countMjsUser.json();
+        ListaUser(usuarios,count);
     });
 
     socket.on('conectado', (payload) => {
+        console.log('usuario conectado')
         mensaje(payload,false);
     });
 
     
-    socket.on('user-actualizado', ({usuario,usuarios}) => {
+    socket.on('user-actualizado', async({usuario,usuarios}) => {
         nombreP.innerHTML =`<h1 class="text-capitalize animated fadeIn">${usuario.nombre} ${usuario.apellido}</h1>`;;
-        user = usuario;
         infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${usuario.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${usuario.nombre}</small></span></a>`;
+        user = usuario;
+        
+        socket.on('count-mjs', (payload) => {
+            ListaUser(usuarios,payload);
+            mensaje(usuario,true);
+            return;
+        });
+
+        const countMjsUser = await fetch(`${url}countMensajes/${user.id}`);
+        const {ok, count} = await countMjsUser.json();
+
+        ListaUser(usuarios,count);
         mensaje(usuario,true);
-        ListaUser(usuarios);
     })
     
     socket.on('desconectado', (payload) => {
+        //socket.emit('count-mjs-para', user.id);
         mensaje(payload,false);
     });
 
