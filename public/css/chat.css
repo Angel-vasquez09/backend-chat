@@ -78,3 +78,25 @@ textarea {
     background: #1fc8df;
     color: white;
 }
+
+.circle{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    background: #0dcaf0;
+}
+
+.activo{
+    display: flex !important;
+    height: 30px !important;
+}
+
+
+.mostrar-chat{
+    display: none;
+}

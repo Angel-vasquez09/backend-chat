@@ -66,15 +66,31 @@
                                         <hr>
 
                                         <!-- NOMBRE DE LA SALA Y LISTA DE USUARIOS CONECTADOS -->
-                                        <ul class="scroll chatonline style-none" id="divUsuarios">
-              
-                                            <!-- 
-                                                EN SOCKET-CHAT-JQUERY.JS
-                                                Y LO RENDERIZAMOS EN SOCKET-CHAT.JS LINEA 27
-                                                Y TAMBIEN RENDERIZAMOS EN LA LINEA 59
-                                            -->
-                                            
-                                        </ul>
+                                        <div class="scroll chatonline style-none animated fadeIn" id="divUsuarios">
+                                            <div class="row">
+                                              <div class="col-8 h-auto pr-0">
+                                                <ul class="p-0 animated fadeIn" id="data-user">
+                                                  <!-- LISTA DE USUARIOS REGISTRADOS -->
+                                                </ul>
+                                              </div>
+
+                                              <div class="col-2">
+                                                <ul class="p-0 animated fadeIn" id="conect-disconect">
+                                                  <!--  ICONOS DE CONEXION DE CADA USUARIO
+                                                        ONLINE Ó OFFLINE -->
+                                                </ul>
+                                              </div>
+
+                                              <div class="col-2 p-0">
+                                                <ul class="p-0 animated fadeIn" id="count-mjs">
+                                                  <!--  CIRCULO CON CANTIDAD DE MENSAJES NO
+                                                        LEIDOS PARA CADA USUARIO -->
+                                                </ul>
+                                              </div>
+
+                                            </div>
+
+                                        </div>
 
 
 
@@ -85,17 +101,17 @@
 
                                 
                                 <!-- PERFIL DEL USUARIO -->
-                                <div class="alto chat-right-aside">
+                                <div id="perfil" class="alto chat-right-aside animated fadeIn">
                                     <!-- EDITAR INFORMACION DEL USUARIO -->
                                     <div class="p-2 display justify-content-between">
-                                      <a class="text-decoration-none" href="index.html"><strong style="color: red">Salir</strong></a>
-                                        
-                                        <i class="tamaño fas fa-edit" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo"></i>
+                                      <!-- <a class="text-decoration-none" href="index.html"><strong style="color: red">Salir</strong></a> -->
+                                      <a class="text-decoration-none" href="index.html" onclick="signOut();"><strong style="color: red">Salir</strong></a>
+                                      <i class="tamaño fas fa-edit" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo"></i>
                                     </div>
                                     <div class="chat-main-header">
                                         
                                         <div class="p-20 b-b">
-                                            <div id="perfilImg" class="perfil-img">
+                                            <div id="perfilImg" class="perfil-img animated fadeIn">
                                                 
                                             </div>
                                         </div>
@@ -113,8 +129,52 @@
                                     </div>
                                 </div>
                                 <!-- FIN DEL PERFIL DE USUARIO -->
-                            
-                            
+                                
+
+                                <!-- CHAT DEL USUARIO SELECCIONADO -->
+                                <div id="chat" class="mostrar-chat chat-right-aside animated fadeIn"> <!-- CHAT -->
+                                  <div class="chat-main-header">
+                                      <div class="p-20 b-b">
+                                          <div class="chat-img">
+                                              <img id="imgUsuario" src="assets/images/users/5.jpg" alt="user" />
+                                              <span id="nombreUser" class="text-capitalize"></span>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <div class="chat-rbox">
+                                      <div id="bienvenido" class="bienvenido">
+                                          
+                                      </div>
+
+                                      <!-- DIV DE LOS MENSAJES -->
+                                      <ul class="chat-list p-20" id="divChatbox">
+                                          
+                                      </ul>
+                                  </div>
+
+                                  <!-- ENVIAR MENSAJE -->
+                                  <form id="formEnviar">
+                                      <div class="card-body b-t">
+                                          <div class="row">
+                                              <div class="col-10">
+                                                  <input autofocus type="false" autocomplete="off" id="txtMensaje" placeholder="Escribe tu mensaje aquí" class="form-control b-0">
+                                              </div>
+                                              <div class="col-2 text-right">
+                                                  <button type="submit" class="btn btn-info btn-circle btn-lg"><i class="fa fa-paper-plane-o"></i> </button>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </form>
+
+                              </div>
+
+
+
+
+
+
+
                             </div>
                             <!-- /.chat-row -->
                         </div>
@@ -132,7 +192,7 @@
             <!-- footer -->
             <!-- ============================================================== -->
             <footer class="footer">
-                Super Chat - Luis Angel Vasquez
+                Chat Box - Universidad Rafael Nuñez 
             </footer>
             <!-- ============================================================== -->
             <!-- End footer -->
@@ -188,7 +248,7 @@
             </div>
 
             <!-- FORMULARIO DE ACTUALIZACION -->
-            <form>
+            <form id="actualizar">
               
                 <div class="form-floating mb-3">
                   <input type="text" id="nombre" class="input form-control" name="Nombre" placeholder="Nombre" value="">
@@ -229,20 +289,20 @@
 
 
     
-   
   </body>
-<script src="js/libs/jquery.min.js"></script>
-<script src="./socket.io/socket.io.js"></script>
-<script src="./js/inicio.js"></script>
-<script src="./js/eventos.js"></script>
-<script src="./js/actualizar.js"></script>
+  <script src="js/libs/jquery.min.js"></script>
+  <script src="./socket.io/socket.io.js"></script>
+  <script src="./js/inicio.js"></script>
+  <script src="./js/eventos.js"></script>
+  <script src="./js/actualizar.js"></script>
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
-</body>
+  <!-- Option 2: Separate Popper and Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+     
+
 </html>

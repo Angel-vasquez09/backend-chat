@@ -1,24 +1,305 @@
+let tokenValido = null; // Token validado
 let sock  = null; // Socket
 let user  = null; // Usuario autenticado
 let usuariosR; // Usuarios registrados en la base de datos
-
+let datosUser; // Usuario al que le enviaremos los mensajes
 var url = (window.location.hostname.includes('localhost'))
             ? 'http://localhost:8080/'
             : 'https://rest-server-09.herokuapp.com/';
 
+// Mostrar chat al darle click
+const perfil          = document.querySelector("#perfil");
+const chat            = document.querySelector("#chat");
+// Datos del usuario con el que chateamos
+const imgUsuario      = document.querySelector("#imgUsuario");
+const nombreUser      = document.querySelector("#nombreUser");
+ 
 
-const divUsuarios = document.querySelector("#divUsuarios");
-const perfilImg   = document.querySelector("#perfilImg");
-const nombreP     = document.querySelector("#nombreP");
-const userAutenticado     = document.querySelector("#userAutenticado");
-const infoUser     = document.querySelector("#infoUser");
-//const correoP     = document.querySelector("#correoP");
+// Datos del usuario autenticado 
+const divUsuarios     = document.querySelector("#divUsuarios");
+const perfilImg       = document.querySelector("#perfilImg");
+const nombreP         = document.querySelector("#nombreP");
+const userAutenticado = document.querySelector("#userAutenticado");
+const infoUser        = document.querySelector("#infoUser");
+
+// Lista de usuarios conectados
+const dataUser        = document.querySelector("#data-user");
+// Icono para los usuarios conectados a desconectados
+const conectDisconect = document.querySelector("#conect-disconect");
+// Div circular de la cantidad de mensaje que tiene cada usuario
+const countMjs        = document.querySelector("#count-mjs");
+
 
 //FORMULARIO DE ACTUALIZAR
 var nombreActualizar  = document.querySelector('#nombre');
 var apellidoActualizar= document.querySelector('#apellido');
 var previewActualizar = document.querySelector('#preview');
 var idActualizar      = document.querySelector('#id');
+
+/* 
+===================================================================
+=========================MOSTRAR CHAT==============================
+==================================================================*/
+// Mostramos el chat con el usuario que vayamos a chatear
+listaUser = async(id = '') => {
+    // Limpiamos el div de los mensajes antes de mostrarlos
+    divChatbox.innerHTML = '';
+    perfil.style.display = 'none';
+    chat.style.display   = 'inline'
+
+    const datosP = await fetch(`${url}usuario/${id}`, { 
+        headers: { 'x-token': tokenValido }
+    });
+
+    // Metodo para obtener el usuario al que le enviaremos
+    // el mensaje
+    const datosD = await datosP.json()
+
+    datosUser = datosD.usuario;
+    
+    imgUsuario.src       = datosUser.img;
+    nombreUser.innerHTML = datosUser.nombre;
+    
+    const resp = await fetch(`${url}mensajes/${id}`, { 
+        headers: { 'x-token':  tokenValido }
+    });
+
+    const mensajes = await resp.json();
+
+    cargarChat(mensajes.mensajes);
+}
+
+infoUser.onclick = () => {
+    perfil.style.display = 'inline';
+    chat.style.display   = 'none'
+}
+
+/* 
+===================================================================
+==================FIN DE MOSTRAR CHAT==============================
+===================================================================
+ */
+
+
+
+
+
+
+
+
+/* 
+===================================================================
+== CARGAR TODOS LOS MENSAJES MIOS Y CON EL USUARIO QUE CHATEO =====
+===================================================================
+ */
+
+const cargarChat = (mensajes) => {
+
+    console.log(mensajes.length);
+    if (mensajes.length === 0) {
+        
+        var welcome = `
+            <div class="container welcome animated fadeIn">
+                <h1 class="display-3 texto text-center">WELCOME</h1>
+            </div>
+            <h2 class="text-center mt-4 animated fadeIn">Mandale un saludo a ${datosUser.nombre}</h2>
+            <h2 class="text-center mt-4 animated fadeIn"> ........................</h2>
+            `;
+        bienvenido.innerHTML = welcome;
+
+    }
+    
+    for (let index = 0; index < mensajes.length; index++) {
+        var mjs = '';
+        const element = mensajes[index];
+        if (element.de === user.id) {
+            var date = new Date(element.createdAt);
+            var hora = date.getHours() + ':' + date.getMinutes(); 
+            mjs += '<li class="reverse animated fadeIn">';
+            mjs +=     '<div class="chat-content">';
+            mjs +=         '<div class="box bg-light-inverse">'+ element.mensaje +'</div>';
+            mjs +=     '</div>';
+            mjs +=     '<div class="chat-time">'+hora+'</div>';
+            mjs += '</li>';
+        }
+        
+        if (element.para === user.id) {
+            var date = new Date(element.createdAt);
+            var hora = date.getHours() + ':' + date.getMinutes(); 
+            mjs += '<li class="animated fadeIn">';
+            mjs +=      '<div class="chat-time">'+hora+'</div>';
+            mjs +=         '<div class="chat-content">';
+            mjs +=             '<div class="box bg-light-info">'+ element.mensaje +'</div>';
+            mjs +=         '</div>';
+            mjs += '</li>';
+        }
+
+        divChatbox.innerHTML += mjs;
+
+        
+    }
+
+}
+/* 
+===================================================================
+============================= FIN =================================
+===================================================================
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+/* 
+===================================================================
+=========================ENVIAR MENSAJE===========================
+==================================================================*/
+
+formEnviar.addEventListener('submit', (e) => {
+    // Evita que se recargue la pagina cuando le damos a el boton
+    e.preventDefault();
+
+    // El trim() elimina los espacios vacios
+    // La condicion no te deja seguir si no mandas ningun texto
+    if (txtMensaje.value.trim().length === 0) {
+        return;
+    }
+
+    var fecha = new Date();
+    var hora = fecha.getHours() + ':' + fecha.getMinutes();
+    
+    socket.emit('enviar-mensaje', {
+        para   : datosUser.id,
+        mensaje: txtMensaje.value,
+        hora   : hora
+    });
+
+    ListarMensajes(
+        {
+            mensaje : txtMensaje.value,
+            hora    : hora
+        }, true);
+
+    txtMensaje.value = '';
+    bienvenido.innerHTML = '';
+    //scrollMensajes(false);
+
+    enviarNotificacion();
+})
+/* 
+===================================================================
+=========================FIN DE ENVIAR MENSAJE=====================
+==================================================================*/
+
+
+
+
+
+
+
+
+
+/* 
+===================================================================
+======= ENVIAR NOTIFICACION DE MENSAJES A EL USUARIO PRIVADO ====
+===================================================================
+ */
+
+const enviarNotificacion = async() => {
+
+    /*Buscamos en la base de datos al usuario que queremos enviarle
+    una notificacion */
+    const obtenerUsuario = await fetch(`${url}pushSubscription/${datosUser.id}`);
+
+    const userObtenido = await obtenerUsuario.json();
+
+    if (userObtenido.ok) {
+        /* Estraemos la suscripcion del navegador de el usuario
+        al que le enviaremos la notify */
+        const data = {
+            title: `${datosUser.nombre}`,
+            url: `${url}chat-privado.html?id=${user.id}`,
+            message: `Tienes un nuevo mensaje de ${user.nombre}`,
+            pushSubscription: userObtenido.verificarId.subcription
+        }
+
+        /* Gracias a la suscripcion que le estragimos al usuario
+        podemos enviarle una notificacion al navegador en que 
+        se encuentre subscrito */
+        const newMessage = await fetch(`${url}webpush/new-message`,{
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        }); 
+    }
+    
+}
+/* 
+===================================================================
+======= ENVIAR NOTIFICACION DE MENSAJES A EL USUARIO PRIVADO ====
+===================================================================
+ */
+
+
+
+
+
+
+
+
+
+
+/*
+===================================================================
+=========================LISTAR MENSAJE EN EL CHAT=================
+==================================================================*/
+const ListarMensajes = (datos,yo) => {
+    
+    var html = '';
+    if (yo) {
+        // Si el mensaje lo envio yo, se mostrara este
+        html += '<li class="reverse animated fadeIn">';
+        html +=     '<div class="chat-content">';
+        //html +=         '<h5>'+ datos.nombre +'</h5>';
+        html +=         '<div class="box bg-light-inverse">'+ datos.mensaje +'</div>';
+        html +=     '</div>';
+/*         html +=     '<div class="chat-img"><img src="assets/images/users/5.jpg" alt="user" /></div>';
+ */     html +=     '<div class="chat-time">'+datos.hora+'</div>';
+        html += '</li>';
+
+    }else{
+        // Este mensaje lo resive la otra persona
+        html += '<li class="animated fadeIn">';
+        html +=      '<div class="chat-time">'+datos.hora+'</div>';
+/*         html +=     '<div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>';
+ */     html +=         '<div class="chat-content">';
+        //html +=             '<h5>'+ datos.nombre +'</h5>';
+        html +=             '<div class="box bg-light-info">'+ datos.mensaje +'</div>';
+        html +=         '</div>';
+        html += '</li>';
+    }
+
+    divChatbox.innerHTML += html;
+}
+/*
+===================================================================
+====================FIN DE LISTAR MENSAJE EN EL CHAT===============
+==================================================================*/
+
+
+
+
+
+
+
+
 
 /* 
 ===================================================================
@@ -29,7 +310,7 @@ const validarTkn = async() => {
 
     // Extraemos el token que tengamos en el navegador
     const token = localStorage.getItem('token') || '';
-
+    tokenValido = token;
     if (token.length <= 10) {
         // Redireccionamos si el token es incorrecto
         window.location = 'index.html';
@@ -138,18 +419,10 @@ const validarTkn = async() => {
 
 
 
-/* 
-===================================================================
-======= LLENAR FORMULARIO DE ACTUALIZACION  ====
-===================================================================
-/*
 
 
-/* 
-===================================================================
-======= FIN DE LLENAR FORMULARIO DE ACTUALIZACION  ====
-===================================================================
-/* 
+
+
 
 
 
@@ -175,8 +448,7 @@ const conectarSocket = async() =>{
 
     // Mostrar los mensajes no leidos al enviar un mensaje privado
     socket.on('count-mjs-priv', ({total,countM}) => {
-        console.log('Holaaa: ',countM);
-        ListaUser(total,countM);
+        cargarCountMjsUser(total,countM);
     })
 
 
@@ -185,45 +457,36 @@ const conectarSocket = async() =>{
         usuariosRegistrados = usuarios;
         infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
         
-        socket.on('count-mjs', (payload) => {
-            console.log('Dentro');
-            ListaUser(usuarios,payload);
-            return;
-        });
-
-
-        const countMjsUser = await fetch(`${url}countMensajes/${user.id}`);
-        const {ok, count} = await countMjsUser.json();
-        ListaUser(usuarios,count);
+        cargarUser(usuarios);
+        conectadoDesconectado(usuarios);
     });
 
-    socket.on('conectado', (payload) => {
-        console.log('usuario conectado')
-        mensaje(payload,false);
+    // Cantidad de mensajes que cada usuario tiene sin leer
+    socket.on('count-mjs', ({users,countM}) => {
+        cargarCountMjsUser(users,countM);
+    })
+
+    // Mensaje que se muestra a todos los usuarios cuando se conecta
+    socket.on('conectado', ({user,users}) => {
+        conectadoDesconectado(users);
+        mensaje(user,false);
     });
 
     
-    socket.on('user-actualizado', async({usuario,usuarios}) => {
-        nombreP.innerHTML =`<h1 class="text-capitalize animated fadeIn">${usuario.nombre} ${usuario.apellido}</h1>`;;
-        infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${usuario.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${usuario.nombre}</small></span></a>`;
-        user = usuario;
-        
-        socket.on('count-mjs', (payload) => {
-            ListaUser(usuarios,payload);
-            mensaje(usuario,true);
-            return;
-        });
+    // Actualizamos los datos del usuario 
+    socket.on('user-actualizado', async({user}) => {
+        nombreP.innerHTML =`<h1 class="text-capitalize animated fadeIn">${user.nombre} ${user.apellido}</h1>`;;
+        infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
+        mensaje(user,true);
+    })
 
-        const countMjsUser = await fetch(`${url}countMensajes/${user.id}`);
-        const {ok, count} = await countMjsUser.json();
-
-        ListaUser(usuarios,count);
-        mensaje(usuario,true);
+    socket.on('actualizado-user', ({usuarios}) => {
+        cargarUser(usuarios);
     })
     
-    socket.on('desconectado', (payload) => {
-        //socket.emit('count-mjs-para', user.id);
-        mensaje(payload,false);
+    socket.on('desconectado', ({user,users}) => {
+        conectadoDesconectado(users);
+        mensaje(user,false);
     });
 
     // socket para saber que el usuario no esta dentro de ningun chat
@@ -238,6 +501,15 @@ const conectarSocket = async() =>{
 ======= FIN DE CONECTAR SOCKET PARA TRABAJAR EN TIEMPO REAL====
 ===================================================================
  */
+
+
+
+
+
+
+
+
+
 
 
 
@@ -283,13 +555,63 @@ const mensaje = (payload,user_actu) => {
  */
 
 
+
+
+
 /* 
 ===================================================================
-======= LISTTAR USUARIOS CONECTADOS====
+======= LISTAR USUARIOS REGISTRADOS - CONECTADO O DESCONECTADO ====
+======= CANTIDAD DE MENSAJES NO LEIDOS                         ====
 ===================================================================
  */
-const ListaUser = (usuarios,payload) => {
+const cargarUser = (usuarios) => {
     infoUser.innerHTML = `<a class="active animated fadeIn" id="user-img"><img src="${user.img}" alt="user-img" class="infoUser img-circle"><asmall class="text-success text-capitalize">${user.nombre}</small></span></a>`;
+    var html = '';
+    for (let index = 0; index < usuarios.length; index++) {
+        const element = usuarios[index];
+        if (element.id !== user.id) {
+            html += `
+            <li class="animated fadeIn" onclick="listaUser('${element.id}')">
+                <a class="text-decoration-none pt-3 pb-2 pr-0 pl-0">
+                    <img src="${element.img}"  class="img-circle"> 
+                    <small class="text-capitalize">${element.nombre}</small>
+                </a>
+            </li>
+            `;
+        }
+    }
+
+    dataUser.innerHTML = html;
+}
+
+const cargarCountMjsUser = (usuarios,countUser) => {
+    
+    var html = '';
+    for (let index = 0; index < usuarios.length; index++) {
+        const element = usuarios[index];
+        
+        if (element.id !== user.id) {
+            for (let index = 0; index < countUser.length; index++) {
+                const countM = countUser[index];
+                if (countM.de === element.id) {
+                    if (countM.cantidad !== 0) {
+                        html += `
+                            <li class="pt-3 pb-2 pr-0 pl-0 animated fadeIn">
+                                <div class="circle"><span>${countM.cantidad}</span></div>
+                            </li>
+                            `;
+                    }
+                }
+            
+            }
+        }
+    }
+    countMjs.innerHTML = html;
+
+}
+
+const conectadoDesconectado = (usuarios) => {
+
     var html = '';
     for (let index = 0; index < usuarios.length; index++) {
         const element = usuarios[index];
@@ -297,31 +619,22 @@ const ListaUser = (usuarios,payload) => {
         if (element.online) {
             conectado = 'conectado';
         }
-        
+
         if (element.id !== user.id) {
-            html += '<li id="chatPrivado" class="row animated fadeIn">';
-
-            html += '   <div class="col-8 p-0">';
-            for (let index = 0; index < payload.length; index++) {
-                const countM = payload[index];
-                if (countM.de === element.id) {
-                    if (countM.cantidad !== 0) {
-                        html += '   <div class="nuevo-mjs"><span>'+countM.cantidad+'</span></div>';
-                    }
-                }
-            }
-            html +=         '<a class="text-decoration-none pr-0" href="chat-privado.html?id='+element.id+'"><img src="'+element.img+'" alt="user-img" class="img-circle"> <span class="text-capitalize">'+ element.nombre +'</span></a>';
-            html += '   </div>';
-
-            html += '   <div class="col-4 dflex">';
-            html += '       <i class="fas fa-circle ml-5 '+conectado+'"></i>';
-            html += '   </div>';
-            html += '</li>';
+            html += `
+                    <li class="pt-3 pb-2 pr-0 pl-0 animated fadeIn">
+                        <div class="activo align-items-center">
+                            <i class="fas fa-circle ${conectado}"></i>
+                        </div>
+                    </li>
+                    `;
+            
+            
         }
-        
     }
 
-    divUsuarios.innerHTML = html;
+    conectDisconect.innerHTML = html;
+
 }
 
 
@@ -349,15 +662,25 @@ input.oninput = async() => {
     texto = input.value;
 
     if (texto === '') {
-        ListaUser(usuariosRegistrados);
+        cargarUser(usuariosRegistrados);
+        conectadoDesconectado(usuariosRegistrados);
         return;
     }
+    let count;
+    socket.emit('countMjs', 'buscar');
+
+    socket.on('countMjs', (countM) => {
+        count = countM;
+        console.log(count);
+    })
 
     const buscarAmigos = await fetch(`${url}buscar/usuarios/${texto}`);
 
     const amigos = await buscarAmigos.json();
 
-    ListaUser(amigos.usuarios);
+    cargarUser(amigos.usuarios);
+    conectadoDesconectado(amigos.usuarios);
+    cargarCountMjsUser(amigos.usuarios,count);
 
 };
 
@@ -367,6 +690,7 @@ input.oninput = async() => {
 ===================== FIN DE SCRIPT DE BUSCAR AMIGOS =====================
 ===================================================================
  */
+
 
 
 

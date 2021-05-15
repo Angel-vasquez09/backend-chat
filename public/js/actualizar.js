@@ -8,7 +8,7 @@ var url = (window.location.hostname.includes('localhost'))
             ? 'http://localhost:8080/'
             : 'https://rest-server-09.herokuapp.com/';
 
-const miForm = document.querySelector('form');
+const miForm          = document.querySelector('#actualizar');
 var nombreActualizar  = document.querySelector('#nombre');
 var apellidoActualizar= document.querySelector('#apellido');
 var previewActualizar = document.querySelector('#preview');
@@ -20,6 +20,8 @@ var foto = {ok: false};
 // Estilos del modal de actualizar
 var snipperns  = document.querySelector('#snipperns');
 var opModal    = document.querySelector('#opModal');
+
+
 
 miForm.addEventListener('submit', async(ev) => {
     ev.preventDefault();

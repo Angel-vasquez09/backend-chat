@@ -37,13 +37,8 @@ const socketController = async(socket = new Socket, io) => {
 
     // Quitar usuario de la lista de los conectados cuando se desconecta
     socket.on('disconnect', async() => {
-        
         const [user,users] = await usuarioDesonectado(usuario.id);
-        const countM       = await countMensajes(usuario.id);
-        socket.broadcast.emit('desconectado', user);
-        io.emit('user-registrados', users);
-        socket.emit('count-mjs', countM);
-
+        socket.broadcast.emit('desconectado', {user,users});
     });
 
     // Me toco emitir primero desde el servidor para poder escuchar el chat activo
@@ -64,11 +59,12 @@ const socketController = async(socket = new Socket, io) => {
 
     socket.on('actualizar', async(payload) => {
         const [user,usuarios] = await actualizarUser(payload);
-        const countM = await countMensajes(usuario.id);
 
-        socket.emit('count-mjs', countM);
-        io.emit('user-registrados', usuarios);
-        socket.emit('user-actualizado', {user,usuarios});
+        // Manda las actualizaciones a todos los usuarios menos a mi
+        socket.broadcast.emit('actualizado-user', {usuarios}); 
+        /* Me manda la actualizacion solo ami, para mostrar un mensaje
+        verificando que se me actualizo correctamente */
+        socket.emit('user-actualizado', {user}); 
         
     })
 
@@ -96,14 +92,19 @@ const socketController = async(socket = new Socket, io) => {
         
     })
 
+    socket.on('countMjs', async() => {
+        const countM = await countMensajes(usuario.id);
+        socket.emit('countMjs', countM);
+    });
+
     const usuarioConectadoServer = async() => {
 
         const [user, users] = await usuarioConectado(usuario.id);
-        const countM              = await countMensajes(usuario.id);
+        const countM        = await countMensajes(usuario.id);
 
-        socket.emit('count-mjs', countM);
-        io.emit('user-registrados', users);
-        socket.broadcast.emit('conectado', user);
+        socket.emit('count-mjs', {users,countM});
+        socket.emit('user-registrados', users);
+        socket.broadcast.emit('conectado', {user,users});
     }
 
     // Se ejecutara cuando un usuario se conecte

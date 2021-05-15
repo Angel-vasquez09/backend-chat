@@ -213,7 +213,7 @@ document.getElementById("file").onchange = function(e) {
 
     foto = e.target.files[0];
     foto['ok'] = true;
-    //console.log(foto);
+    
 }
 
 const defaultBtn = document.querySelector("#file");

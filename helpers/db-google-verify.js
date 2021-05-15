@@ -8,14 +8,16 @@ const googleVerifu = async(id_token = '') => {
       idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,  
   }); 
-
-  const { 
-        email: correo,
-        name: nombre,
-        picture: img
-        } = ticket.getPayload();
   
-  return {correo, nombre, img};
+  
+  const { 
+    email: correo, 
+    given_name: nombre,
+    family_name: apellido,
+    picture: img
+      } = ticket.getPayload();
+  
+  return {correo, nombre,apellido, img};
 }
 
 
