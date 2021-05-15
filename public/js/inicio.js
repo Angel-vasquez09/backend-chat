@@ -29,6 +29,8 @@ const conectDisconect = document.querySelector("#conect-disconect");
 // Div circular de la cantidad de mensaje que tiene cada usuario
 const countMjs        = document.querySelector("#count-mjs");
 
+// Div donde se colocaran los mensajes
+const divChatbox      = document.querySelector('#divChatbox') 
 
 //FORMULARIO DE ACTUALIZAR
 var nombreActualizar  = document.querySelector('#nombre');
@@ -42,6 +44,8 @@ var idActualizar      = document.querySelector('#id');
 ==================================================================*/
 // Mostramos el chat con el usuario que vayamos a chatear
 listaUser = async(id = '') => {
+    socket.emit('chat-activo',{de: id, para: user.id, chat: true });
+    
     // Limpiamos el div de los mensajes antes de mostrarlos
     divChatbox.innerHTML = '';
     perfil.style.display = 'none';
@@ -67,6 +71,8 @@ listaUser = async(id = '') => {
     const mensajes = await resp.json();
 
     cargarChat(mensajes.mensajes);
+    scrollMensajes(true);
+    //cargarCountMjsUser();
 }
 
 infoUser.onclick = () => {
@@ -95,7 +101,6 @@ infoUser.onclick = () => {
 
 const cargarChat = (mensajes) => {
 
-    console.log(mensajes.length);
     if (mensajes.length === 0) {
         
         var welcome = `
@@ -189,7 +194,7 @@ formEnviar.addEventListener('submit', (e) => {
 
     txtMensaje.value = '';
     bienvenido.innerHTML = '';
-    //scrollMensajes(false);
+    scrollMensajes(false);
 
     enviarNotificacion();
 })
@@ -197,6 +202,47 @@ formEnviar.addEventListener('submit', (e) => {
 ===================================================================
 =========================FIN DE ENVIAR MENSAJE=====================
 ==================================================================*/
+
+
+
+
+
+
+
+
+
+/* 
+===================================================================
+=========================SCROLL DE MENSAJES========================
+===================================================================*/
+const scrollMensajes = (cargar) => {
+
+    $(document).ready(function(){
+        if (cargar) {
+            divChatbox.scrollTop = divChatbox.scrollHeight;
+            return;
+        }
+        // selectors
+        var newMessage       = $("#divChatbox li:last-child");
+        
+        // heights
+        var clientHeight     = divChatbox.clientHeight;
+        var scrollTop        = $('#divChatbox').scrollTop();
+        var scrollHeight     = divChatbox.scrollHeight;
+        var newMessageHeight = newMessage.innerHeight();
+        var lastMessageHeight= newMessage.prev().innerHeight() || 0;
+        
+        if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+            divChatbox.scrollTop = scrollHeight;
+        }
+    });
+}
+
+
+/* 
+===================================================================
+=========================FIN DE SCROL DE MESAJE====================
+===================================================================*/
 
 
 
@@ -445,11 +491,14 @@ const conectarSocket = async() =>{
             
         })
     });
-
+    
     // Mostrar los mensajes no leidos al enviar un mensaje privado
-    socket.on('count-mjs-priv', ({total,countM}) => {
-        cargarCountMjsUser(total,countM);
+    socket.on('mensaje-privado', ({datos,yo}) => {
+        ListarMensajes(datos,yo);
+        //cargarCountMjsUser(users,countM);
     })
+
+    
 
 
     socket.on('user-registrados', async(usuarios) => {
@@ -482,6 +531,12 @@ const conectarSocket = async() =>{
 
     socket.on('actualizado-user', ({usuarios}) => {
         cargarUser(usuarios);
+    })
+
+    /* Cuando el usuario entre a un chat, se colocara en cero
+    los mensajes que no tenia leidos */
+    socket.on('cargar-count', ({total,listo}) => {
+        cargarCountMjsUser(total,listo);
     })
     
     socket.on('desconectado', ({user,users}) => {
@@ -589,23 +644,45 @@ const cargarCountMjsUser = (usuarios,countUser) => {
     var html = '';
     for (let index = 0; index < usuarios.length; index++) {
         const element = usuarios[index];
+        let encontrado = false;
         
         if (element.id !== user.id) {
             for (let index = 0; index < countUser.length; index++) {
                 const countM = countUser[index];
                 if (countM.de === element.id) {
-                    if (countM.cantidad !== 0) {
+                    encontrado = true;
+                    if (countM.cantidad === 0) {
                         html += `
                             <li class="pt-3 pb-2 pr-0 pl-0 animated fadeIn">
-                                <div class="circle"><span>${countM.cantidad}</span></div>
+                                <div style="width:30px !important;height: 30px;"></span></div>
                             </li>
-                            `;
+                                `;
+                    }else{
+                                html += `
+                                <li class="pt-3 pb-2 pr-0 pl-0 animated fadeIn">
+                                <div class="circle"><span>${countM.cantidad}</span></div>
+                                </li>
+                                `;
                     }
+
                 }
-            
+                        
+            }
+
+            if (!encontrado) {
+                
+                html += `
+                <li class="pt-3 pb-2 pr-0 pl-0 animated fadeIn">
+                    <div style="width:30px !important;height: 30px;"></span></div>
+                </li>
+                `;
+            }else{
+                encontrado = false;
+                
             }
         }
     }
+    
     countMjs.innerHTML = html;
 
 }

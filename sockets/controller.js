@@ -47,6 +47,10 @@ const socketController = async(socket = new Socket, io) => {
 
     socket.on('chat-activo', async({de,para,chat}) => {
         await chatActivo(de,para,chat);
+
+        const listo = await countMensajes(para);
+        const total = await totalUser();
+        socket.emit('cargar-count', {total,listo});
     })
     
     socket.on('chat-inactivo', async({de,para,chat}) => {
@@ -79,14 +83,19 @@ const socketController = async(socket = new Socket, io) => {
         // Le enviamos el mensaje al usuario con el que estamos chateando
         socket.to(para).emit('mensaje-privado', { datos: datos, yo: false})
         
+        
+
         await guardarCountMjs({de: usuario.id,para: para, num: 1 });
         
-        // Le eniamos una notificacion al usuario de que tiene un mensaje sin leer
+        const listo = await countMensajes(para);
+        const total = await totalUser();
+        socket.to(para).emit('cargar-count', {total,listo});
+        /* // Le eniamos una notificacion al usuario de que tiene un mensaje sin leer
         const countM = await countMensajes(para);
         
         const total = await totalUser();
 
-        socket.to(para).emit('count-mjs-priv', {total,countM});
+        socket.to(para).emit('count-mjs-priv', {total,countM}); */
         
         
         
@@ -104,6 +113,7 @@ const socketController = async(socket = new Socket, io) => {
 
         socket.emit('count-mjs', {users,countM});
         socket.emit('user-registrados', users);
+        socket.broadcast.emit('user-registrados', users);
         socket.broadcast.emit('conectado', {user,users});
     }
 

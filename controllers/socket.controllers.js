@@ -86,12 +86,15 @@ const actualizarUser = async(data) => {
 const chatActivo = async(de,para,chat) => {
 
     const usuario  = await Usuario.findById(de);
+    const totalCountUser = await CountMjs.find();
     usuario.usuario = para;
+    
     if (chat) {
         usuario.chat = true;
         const count = await CountMjs.find({
-            $and: [{de: para},{para: de}]
+            $and: [{de: de},{para: para}]
         });
+
         if (count.length > 0) {
             // Cuando entre al chat colocamos en 0 los mensajes que no habiamos leido
             count[0].cantidad = 0;
@@ -102,7 +105,7 @@ const chatActivo = async(de,para,chat) => {
     }
     await usuario.save();
 
-    return true;
+    return totalCountUser;
 
 }
 
